@@ -42,12 +42,12 @@ fn date_part() -> Parser<u8, (Option<f32>, Option<f32>, Option<f32>, Option<f32>
 fn time_part() -> Parser<u8, Option<(Option<f32>, Option<f32>, Option<f32>)>> {
 	(
 		sym(b'T') *
-			(
-				(number() - sym(b'H')).opt() +
-					(number() - sym(b'M')).opt() +
-					(number() - sym(b'S')).opt()
-			)
-				.map(|((hours,minutes), seconds)| {
+
+				all3((number() - sym(b'H')).opt(),
+					(number() - sym(b'M')).opt(),
+					(number() - sym(b'S')).opt())
+
+				.map(|(hours, minutes, seconds)| {
 					(hours, minutes, seconds)
 				})
 	).opt()

@@ -483,6 +483,25 @@ impl<'a, I: Copy, O: 'a, U: 'a> Add<Parser<'a, I, U>> for Parser<'a, I, O> {
 	}
 }
 
+/// Alternate syntax for above
+pub fn all2<'a, I, O: 'a, U: 'a>(p1: Parser<'a, I, O>, p2: Parser<'a, I, U>) -> Parser<'a, I, (O, U)> {
+	Parser::new(move |input: &'a [I], start: usize| {
+		(p1.method)(input, start).and_then(|(out1, pos1)| {
+			(p2.method)(input, pos1).map(|(out2, pos2)| ((out1, out2), pos2))
+		})
+	})
+}
+
+pub fn all3<'a, I, O: 'a, U: 'a, V: 'a>(p1: Parser<'a, I, O>, p2: Parser<'a, I, U>, p3: Parser<'a, I, V>) -> Parser<'a, I, (O, U, V)> {
+	Parser::new(move |input: &'a [I], start: usize| {
+		(p1.method)(input, start).and_then(|(out1, pos1)| {
+			(p2.method)(input, pos1).map(|(out2, pos2)| ((out1, out2), pos2))
+		}).and_then(|((out1, out2), pos2)| {
+			(p3.method)(input, pos2).map(|(out3, pos3)| ((out1, out2, out3), pos3))
+		})
+	})
+}
+
 /// Sequence discard second value
 impl<'a, I: Copy, O: 'a, U: 'a> Sub<Parser<'a, I, U>> for Parser<'a, I, O> {
 	type Output = Parser<'a, I, O>;
